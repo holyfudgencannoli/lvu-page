@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Cloudflare R2 Multipart Upload</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Video Upload</title>
   <style>
     body {
       font-family: system-ui, sans-serif;
@@ -32,10 +32,10 @@
   </style>
 </head>
 <body>
-  <h1>Upload Video to R2</h1>
-  <input type="file" id="fileInput" accept="video/*" />
+  <h1>Upload Video</h1>
+  <input type="file" id="fileInput" accept="video/*">
   <button id="uploadBtn">Upload</button>
-  
+
   <div class="progress"><div class="progress-bar" id="progressBar"></div></div>
   <div id="status"></div>
 
@@ -44,8 +44,9 @@
     const fileInput = document.getElementById("fileInput");
     const progressBar = document.getElementById("progressBar");
     const status = document.getElementById("status");
-    const API_BASE = "https://large-video-uploader.moshimoshi8246.workers.dev";
 
+    // Replace with your Worker URL
+    const API_BASE = "https://large-video-uploader.moshimoshi8246.workers.dev";
 
     uploadBtn.addEventListener("click", async () => {
       const file = fileInput.files?.[0];
@@ -59,7 +60,7 @@
 
       try {
         // 1️⃣ Start multipart upload
-        const initRes = await fetch(`${API_BASE}/initiate`);
+        const initRes = await fetch(`${API_BASE}/initiate`, { method: "POST" });
         const { uploadId, key } = await initRes.json();
 
         const CHUNK_SIZE = 10 * 1024 * 1024; // 10 MB
@@ -92,7 +93,8 @@
           await new Promise((resolve, reject) => {
             xhr.onload = () => {
               if (xhr.status >= 200 && xhr.status < 300) {
-                const etag = xhr.getResponseHeader("ETag").replace(/"/g, "");
+                const etag = xhr.getResponseHeader("ETag")?.replace(/"/g, "");
+                if (!etag) return reject(new Error("No ETag returned"));
                 parts.push({ etag, partNumber });
                 resolve();
               } else {
