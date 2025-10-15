@@ -44,6 +44,8 @@
     const fileInput = document.getElementById("fileInput");
     const progressBar = document.getElementById("progressBar");
     const status = document.getElementById("status");
+    const API_BASE = "https://upload-api.<your-subdomain>.workers.dev";
+
 
     uploadBtn.addEventListener("click", async () => {
       const file = fileInput.files?.[0];
@@ -57,7 +59,7 @@
 
       try {
         // 1️⃣ Start multipart upload
-        const initRes = await fetch("/initiate");
+        const initRes = await fetch(`${API_BASE}/initiate`);
         const { uploadId, key } = await initRes.json();
 
         const CHUNK_SIZE = 10 * 1024 * 1024; // 10 MB
@@ -72,7 +74,7 @@
 
           // 2️⃣ Get signed URL for this part
           const signRes = await fetch(
-            `/sign-part?key=${key}&uploadId=${uploadId}&partNumber=${partNumber}`
+            `${API_BASE}/sign-part?key=${key}&uploadId=${uploadId}&partNumber=${partNumber}`
           );
           const { signedUrl } = await signRes.json();
 
@@ -104,7 +106,7 @@
 
         // 4️⃣ Complete upload
         status.textContent = "Finalizing...";
-        const completeRes = await fetch("/complete", {
+        const completeRes = await fetch(`${API_BASE}/complete`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ key, uploadId, parts }),
